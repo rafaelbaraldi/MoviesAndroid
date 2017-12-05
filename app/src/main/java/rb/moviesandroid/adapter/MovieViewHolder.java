@@ -33,7 +33,7 @@ public class MovieViewHolder extends RecyclerView.ViewHolder {
         Picasso.with(movieView.getContext())
                 .load("http://image.tmdb.org/t/p/original" + movie.getPosterPath())
                 .placeholder(drawable)
-                .networkPolicy(NetworkPolicy.OFFLINE)
+//                .networkPolicy(NetworkPolicy.OFFLINE)
                 .into(movieView.imgPoster);
 
     }

@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.LinearLayout;
 
+import com.github.pwittchen.infinitescroll.library.InfiniteScrollListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +31,10 @@ import retrofit2.Response;
  */
 public class MovieFragment extends Fragment {
 
-    private RecyclerView recyclerView;
-
+    public RecyclerView recyclerView;
+    private LinearLayoutManager layoutManager;
     private MovieAdapter movieAdapter;
+    private static int page = 1;
 
     public static MovieFragment newInstance() {
         Bundle args = new Bundle();
@@ -52,24 +55,24 @@ public class MovieFragment extends Fragment {
 
         movieAdapter = new MovieAdapter();
 
+        layoutManager = new LinearLayoutManager(getContext(), LinearLayout.VERTICAL, false);
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayout.VERTICAL, false));
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(movieAdapter);
 
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new InfiniteScrollListener(20, layoutManager) {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
+            public void onScrolledToEnd(int firstVisibleItemPosition) {
+                page++;
+                getMovies();
             }
         });
+        getMovies();
+    }
 
-        ServiceFactory.getMovieService().getMovies("d7378b8d8f3194315f9163bd01782a7b", 1).enqueue(new Callback<MovieResponse>() {
+    private void getMovies() {
+        ServiceFactory.getMovieService().getMovies("d7378b8d8f3194315f9163bd01782a7b", page).enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
                 movieAdapter.addAll(response.body().getMovieList());
